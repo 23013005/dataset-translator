@@ -20,7 +20,7 @@ if uploaded_file:
     df = pd.read_csv(uploaded_file)
 
     st.subheader("Preview Dataset")
-    st.dataframe(df.head())
+    st.dataframe(df.head(10))
 
     column = st.selectbox(
         "Pilih kolom yang berisi bahasa Indonesia",
@@ -52,11 +52,12 @@ if uploaded_file:
         st.success("Translasi selesai")
 
         st.subheader("Preview Hasil")
-        st.dataframe(df.head())
+        st.dataframe(df.head(10))
 
         st.download_button(
             label="Download CSV Hasil",
             data=df.to_csv(index=False).encode("utf-8"),
             file_name="translated_dataset.csv",
             mime="text/csv"
+
         )
