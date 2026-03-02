@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from deep_translator import GoogleTranslator
 from time import sleep
+from io import BytesIO
 
 st.set_page_config(
     page_title="Dataset Translator ID → EN",
@@ -54,10 +55,25 @@ if uploaded_file:
         st.subheader("Preview Hasil")
         st.dataframe(df.head(10))
 
-        st.download_button(
-            label="Download CSV Hasil",
-            data=df.to_csv(index=False).encode("utf-8"),
-            file_name="translated_dataset.csv",
-            mime="text/csv"
+        # Download CSV
+st.download_button(
+    label="⬇️ Download hasil (CSV)",
+    data=df.to_csv(index=False).encode("utf-8"),
+    file_name="translated_dataset.csv",
+    mime="text/csv"
+)
+
+# Download Excel
+excel_buffer = BytesIO()
+with pd.ExcelWriter(excel_buffer, engine="xlsxwriter") as writer:
+    df.to_excel(writer, index=False, sheet_name="Translated Data")
+
+st.download_button(
+    label="⬇️ Download hasil (Excel)",
+    data=excel_buffer.getvalue(),
+    file_name="translated_dataset.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 
         )
+
