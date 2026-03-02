@@ -12,6 +12,12 @@ st.set_page_config(
 st.title("📊 Dataset Translator: Indonesian → English")
 st.caption("Upload CSV → Translate kolom → Download hasil")
 
+# =========================
+# INIT SESSION STATE
+# =========================
+if "is_processing" not in st.session_state:
+    st.session_state.is_processing = False
+
 uploaded_file = st.file_uploader(
     "Upload file CSV (dataset bahasa Indonesia)",
     type=["csv"]
@@ -28,7 +34,15 @@ if uploaded_file:
         df.columns
     )
 
-    if st.button("Translate Dataset"):
+    # =========================
+    # TRANSLATE BUTTON (DISABLED WHEN RUNNING)
+    # =========================
+    if st.button(
+        "Translate Dataset",
+        disabled=st.session_state.is_processing
+    ):
+        st.session_state.is_processing = True
+
         translator = GoogleTranslator(source="id", target="en")
         translated = []
 
@@ -49,14 +63,16 @@ if uploaded_file:
 
         df[f"{column}_english"] = translated
 
+        st.session_state.is_processing = False
+
         st.success("Translasi selesai")
 
         st.subheader("Preview Hasil (10 baris pertama)")
         st.dataframe(df.head(10))
 
-        # ======================
+        # =========================
         # DOWNLOAD CSV
-        # ======================
+        # =========================
         st.download_button(
             label="⬇️ Download hasil (CSV)",
             data=df.to_csv(index=False).encode("utf-8"),
@@ -64,9 +80,9 @@ if uploaded_file:
             mime="text/csv"
         )
 
-        # ======================
+        # =========================
         # DOWNLOAD EXCEL
-        # ======================
+        # =========================
         excel_buffer = BytesIO()
         with pd.ExcelWriter(excel_buffer, engine="xlsxwriter") as writer:
             df.to_excel(writer, index=False, sheet_name="Translated Data")
